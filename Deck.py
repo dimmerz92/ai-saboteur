@@ -34,7 +34,7 @@ class Deck:
 
         for i in range(C.SPECIAL_CARDS["GOAL"]["QTY"]):
             cards["goal"].append(Card("CROSS_ROAD", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i))
-            cards["hidden"].append(Card("GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"]))
+            cards["hidden"].append(Card("GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i))
             
         return cards
     
