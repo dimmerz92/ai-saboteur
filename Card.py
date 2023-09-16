@@ -6,8 +6,8 @@ class Card:
         self.name = name
         self.type = card_type
         self.directions = directions
-        self.gold = gold
-        self.img = self._set_img(name, gold)
+        self._img = self._set_img(name, gold)
+        self._gold = gold
 
     def _set_img(self, name, gold):
         return IMG_PATH[name] + ("_GOLD" if gold else "")
