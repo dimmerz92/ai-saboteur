@@ -19,7 +19,11 @@ class Deck:
         random.shuffle(deck)
         return deck
     
-    def get_special_cards(self):
+    def deal_hand(self, quantity):
+        return [self._deck.pop() for _ in range(quantity)]
+    
+    @staticmethod
+    def get_special_cards():
         cards = {
             "start": Card("CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
             "goal": [],
@@ -33,9 +37,6 @@ class Deck:
             cards["hidden"].append(Card("GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"]))
             
         return cards
-    
-    def deal_hand(self, quantity):
-        return [self._deck.pop() for _ in range(quantity)]
     
 if __name__ == "__main__":
     deck = Deck()
