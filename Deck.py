@@ -5,6 +5,7 @@ import random
 class Deck:
     def __init__(self):
         self._deck = self._init_deck()
+        self._goal_cards = self._get_special_cards()
 
     def _init_deck(self):
         deck = []
@@ -19,11 +20,8 @@ class Deck:
         random.shuffle(deck)
         return deck
     
-    def deal_hand(self, quantity):
-        return [self._deck.pop() for _ in range(quantity)]
-    
     @staticmethod
-    def get_special_cards():
+    def _get_special_cards():
         cards = {
             "start": Card("CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
             "goal": [],
@@ -37,6 +35,9 @@ class Deck:
             cards["hidden"].append(Card("GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i))
             
         return cards
+    
+    def deal_hand(self, quantity):
+        return [self._deck.pop() for _ in range(quantity)]
     
 if __name__ == "__main__":
     deck = Deck()
