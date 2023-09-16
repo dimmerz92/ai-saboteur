@@ -23,7 +23,8 @@ class Deck:
     @staticmethod
     def _get_special_cards():
         cards = {
-            "start": Card("CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
+            "start": Card(
+                "CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
             "goal": [],
             "hidden": []
         }
@@ -31,13 +32,20 @@ class Deck:
         gold = random.randint(0, len(C.GOAL_COORDS))
 
         for i in range(C.SPECIAL_CARDS["GOAL"]["QTY"]):
-            cards["goal"].append(Card("CROSS_ROAD", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i))
-            cards["hidden"].append(Card("GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i))
+            cards["goal"].append(Card(
+                "CROSS_ROAD","PATH",C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i
+                ))
+            cards["hidden"].append(Card(
+                "GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i
+                ))
             
         return cards
     
     def deal_hand(self, quantity):
         return [self._deck.pop() for _ in range(quantity)]
+    
+    def draw_card(self):
+        return self._deck.pop() if len(self._deck) > 0 else None
     
 if __name__ == "__main__":
     deck = Deck()
