@@ -47,7 +47,7 @@ class Game:
         agents = {}
         for i, role in enumerate(ROLES):
             agents[f"agent-{i}"] = {
-                "agent": Agent(role),
+                "agent": Agent(role, self.deck.deal_hand(C.DEAL)),
                 "history": []
             }
         
@@ -306,10 +306,10 @@ class Game:
             f"The target must be a tuple of len 2 with integers in the "\
                 "gameboard bounds: (0, 0) and ({C.ROWS - 1}, {C.COLS - 1})"
         
+        agent = new_game_state["agents"][new_game_state["turn"]]
         if card.name == "MAP":
-            agent = new_game_state["agents"][new_game_state["turn"]]
             gold = new_game_state["gameboard"][target].is_gold()
-            agent.update_known_goals(target, gold)
+            agent["agent"].update_known_goals(target, gold)
         else:
             assert target in new_game_state["valid-cells"], \
                 f"Target coords are not in the list of valid cells"
@@ -319,9 +319,10 @@ class Game:
                 new_game_state["gameboard"][target] = card
         
         if Game._is_terminal(new_game_state, target):
-            agent = new_game_state["agents"][new_game_state["turn"]]
-            new_game_state["winner"] = agent.role
+            new_game_state["winner"] = agent["agent"].role
         else:
+            new_game_state["agents"][new_game_state["turn"]]["history"].append(
+                card.name)
             new_game_state["turn"] = Game._next_turn(new_game_state)
 
         return new_game_state
@@ -353,11 +354,6 @@ class Game:
         self.turn = new_game_state["turn"]
         self.winner = new_game_state["winner"]
         
-        
-
-
-        
-
 if __name__ == "__main__":
     game = Game()
     state = game.get_percepts()
