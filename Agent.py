@@ -1,7 +1,8 @@
 from typing import Callable
 
 class Agent:
-    def __init__(self, role: str, hand: list, logic: Callable[[dict], dict]):
+    def __init__(self, role: str, hand: list,
+                 logic: Callable[[dict, list], dict]):
         self._role = role
         self._hand = hand
         self._logic = logic
@@ -33,7 +34,7 @@ class Agent:
                 action (dict|None): a dictionary or None
         """
         # think
-        action = self._logic(game_state)
+        action = self._logic(game_state, self._hand)
 
         # act
         if not action:
