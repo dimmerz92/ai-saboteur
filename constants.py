@@ -2,8 +2,6 @@ ROWS = 20
 COLS = 20
 GOALS = 3
 DEAL = 4
-MIN_COORD = (0, 0)
-MAX_COORD = (ROWS - 1, COLS - 1)
 
 START = (6, 10)
 GOAL_COORDS = [(14, 8), (14, 10), (14, 12)]
@@ -58,11 +56,6 @@ DEAD_END_CARDS = {
     "JUNCTION_DE": {"PATH": ["WEST", "SOUTH", "EAST"], "QTY": 1},
     "LINEAR_DE": {"PATH": ["NORTH", "SOUTH"], "QTY": 1}
 }
-
-VALID_PATH_CARDS = set().union(PATHS.keys(), DEAD_ENDS.keys(), SPECIALS.keys())
-VALID_PATH_CARDS_ONLY = set().union(PATHS.keys(), DEAD_ENDS.keys())
-VALID_ACTION_CARDS = ACTIONS.keys()
-VALID_SPECIAL_CARDS = SPECIALS.keys()
 
 CELL_SIZE = 50
 WINDOW_SIZE = (COLS * CELL_SIZE, ROWS * CELL_SIZE)
