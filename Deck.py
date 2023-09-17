@@ -4,8 +4,8 @@ import random
 
 class Deck:
     def __init__(self):
-        self._deck = self._init_deck()
-        self._goal_cards = self._get_special_cards()
+        self.deck = self._init_deck()
+        self.goal_cards = Deck._get_special_cards()
 
     def _init_deck(self):
         deck = []
@@ -20,7 +20,6 @@ class Deck:
         random.shuffle(deck)
         return deck
     
-    @staticmethod
     def _get_special_cards():
         cards = {
             "start": Card(
