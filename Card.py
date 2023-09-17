@@ -1,6 +1,5 @@
 from assets import IMG_PATH
 import constants as C
-import pygame
 
 class Card:
     def __init__(self, name: str, card_type: str, directions: list,
@@ -11,9 +10,9 @@ class Card:
         self.img = self._set_img(name)
         self._gold = gold
 
-    def _set_img(self, name: str) -> pygame.Surface:
+    def _set_img(self, name: str) -> dict:
         """
-        Returns the path for a given named asset
+        Returns a dictionary containing the path and rotation of the card image
 
             Parameters:
                 name (str): a string
@@ -21,7 +20,7 @@ class Card:
             Returns:
                 img (Surface): a pygame image
         """
-        return pygame.image.load(IMG_PATH[name])
+        return {"path": IMG_PATH[name], "angle": 0}
     
     def flip(self) -> None:
         """
@@ -30,10 +29,10 @@ class Card:
         if self.name == "GOAL":
             if self._gold:
                 self.name = "CROSS_ROAD_GOLD"
-                self.img = pygame.image.load(IMG_PATH["CROSS_ROAD_GOLD"])
+                self.img["path"] = IMG_PATH["CROSS_ROAD_GOLD"]
             else:
                 self.name = "CROSS_ROAD"
-                self.img = pygame.image.load(IMG_PATH["CROSS_ROAD"])
+                self.img["path"] = IMG_PATH["CROSS_ROAD"]
 
     def transpose(self, angle: int) -> None:
         """
@@ -49,7 +48,7 @@ class Card:
             "Transpositions can only occur at 90, 180, or 270 degree increments"
 
         transpositions = angle // 90
-        self.img = pygame.transform.rotate(self.img, angle)
+        self.img["angle"] = angle
         for _ in range(transpositions):
             for i, dir in enumerate(self.directions):
                 self.directions[i] = C.TRANSPOSE[dir]
