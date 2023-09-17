@@ -1,6 +1,7 @@
 from Agent import Agent
 from Card import Card
 from Deck import Deck
+from agent_logic import random_behaviour
 
 from copy import deepcopy
 import constants as C
@@ -47,26 +48,30 @@ class Game:
         agents = {}
         for i, role in enumerate(ROLES):
             agents[f"agent-{i}"] = {
-                "agent": Agent(role, self.deck.deal_hand(C.DEAL)),
+                "agent": Agent(role, self.deck.deal_hand(C.DEAL), random_behaviour),
                 "history": []
             }
         
         return agents
     
+    def whos_turn(self) -> Agent:
+        return self.agents[self.turn]["agent"]
+    
     @staticmethod
-    def _valid_tunnel(gameboard: np.ndarray, coords: tuple) -> bool:
+    def _valid_tunnel(game_state: np.ndarray, coords: tuple) -> bool:
         """
         Checks if a given coordinate corresponds to a valid tunnel back to the
         start
         
             Parameters:
-                gameboard (ndarray): a 2D numpy array
+                game_state (dict): a dictionary
                 coords (tuple): a tuple containing 2 positive zero inclusive
                 integers
 
             Returns:
                 (bool)
         """
+        gameboard = game_state["gameboard"]
         visited = []
         nodes = [coords]
 
@@ -77,12 +82,13 @@ class Game:
             for offset in C.DIRECTIONS.values():
                 next_node = tuple(map(sum, zip(offset, node)))
 
-                if next_node < (0, 0) or next_node > (C.ROWS - 1, C.COLS - 1):
+                if (next_node < (0, 0) or next_node[0] > C.ROWS - 1 or
+                    next_node[1] > C.COLS - 1):
                     continue
 
                 next_cell = gameboard[next_node]
                 if next_cell and not node == coords:
-                    if not Game.is_valid_play(gameboard, next_cell, next_node):
+                    if not Game.is_valid_play(game_state, next_cell, next_node):
                         continue
                 
                 if (next_cell and next_node not in visited):
@@ -94,16 +100,17 @@ class Game:
         return False
     
     @staticmethod
-    def _get_valid_cells(gameboard: np.ndarray) -> list:
+    def get_valid_cells(game_state: dict) -> list:
         """
         Gets all valid, playable cells on the gameboard
 
             Parameters:
-                gameboard (ndarray): a 2D numpy array
+                game_state (dict): a dictionary
 
             Returns:
                 neighbours (list): a list of x, y coordinate tuples
         """
+        gameboard = game_state["gameboard"]
         neighbours = []
 
         for row in range(C.ROWS - 1):
@@ -117,13 +124,13 @@ class Game:
                     offset = C.DIRECTIONS[dir]
                     next_coord = tuple(map(sum, zip((row, col), offset)))
 
-                    if (next_coord < (0, 0) or
-                        next_coord > (C.ROWS - 1, C.COLS - 1)):
+                    if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+                        next_coord[1] > C.COLS - 1):
                         continue
 
                     next_cell = gameboard[next_coord]
                     if (next_cell or
-                        not Game._valid_tunnel(gameboard, next_coord)):
+                        not Game._valid_tunnel(game_state, next_coord)):
                         continue
                     neighbours.append(next_coord)
 
@@ -149,9 +156,9 @@ class Game:
                 "'agent-\{i\}'"
             
             if card.name == "SABOTAGE":
-                return not game_state["agents"][target].broken_tools
+                return not game_state["agents"][target]["agent"].broken_tools
             else:
-                return game_state["agents"][target].broken_tools
+                return game_state["agents"][target]["agent"].broken_tools
         
         gameboard = game_state["gameboard"]
         cell = gameboard[target]
@@ -170,7 +177,8 @@ class Game:
             for coord in C.DIRECTIONS.values():
                 next_coord = tuple(map(sum, zip(coord, target)))
 
-                if next_coord < (0, 0) or next_coord > (C.ROWS - 1, C.COLS - 1):
+                if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+                    next_coord[1] > C.COLS - 1):
                     continue
 
                 next_cell = gameboard[next_coord]
@@ -182,7 +190,8 @@ class Game:
             offset = C.DIRECTIONS[dir]
             next_coord = tuple(map(sum, zip(target, offset)))
 
-            if next_coord < (0, 0) or next_coord > (C.ROWS - 1, C.COLS - 1):
+            if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+                next_coord[1] > C.COLS - 1):
                 continue
 
             next_cell = gameboard[next_coord]
@@ -236,6 +245,10 @@ class Game:
             offset = C.DIRECTIONS[dir]
             next_coord = tuple(map(sum, zip(coord, offset)))
 
+            if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+                next_coord[1] > C.COLS - 1):
+                continue
+
             if not game_state["gameboard"][next_coord]:
                 continue
 
@@ -257,7 +270,6 @@ class Game:
         """
         return {
             "gameboard": self.gameboard.copy(),
-            "valid-cells": Game._get_valid_cells(self.gameboard),
             "agents": deepcopy(self.agents),
             "turn": self.turn,
             "winner": self.winner,
@@ -275,7 +287,7 @@ class Game:
             Returns:
                 new_game_state (dict): a dictionary
         """
-        new_game_state = game_state.copy()
+        new_game_state = deepcopy(game_state)
         if not action:
             new_game_state["skipped"] += 1
             return new_game_state
@@ -302,7 +314,8 @@ class Game:
 
         assert (isinstance(target, tuple) and len(target) == 2 and
                    all(isinstance(v, int) for v in target) and
-                   target >= (0, 0) and target <= (C.ROWS - 1, C.COLS - 1)), \
+                   target >= (0, 0) and target[0] <= C.ROWS - 1 and
+                   target[1] <= C.COLS - 1), \
             f"The target must be a tuple of len 2 with integers in the "\
                 "gameboard bounds: (0, 0) and ({C.ROWS - 1}, {C.COLS - 1})"
         
@@ -311,7 +324,7 @@ class Game:
             gold = new_game_state["gameboard"][target].is_gold()
             agent["agent"].update_known_goals(target, gold)
         else:
-            assert target in new_game_state["valid-cells"], \
+            assert target in Game.get_valid_cells(new_game_state), \
                 f"Target coords are not in the list of valid cells"
             if card.name == "DYNAMITE":
                 new_game_state["gameboard"][target] = None
@@ -364,7 +377,7 @@ if __name__ == "__main__":
     lnr.transpose(90)
     # game.gameboard[(6,11)] = crrd
     # # print(game.gameboard)
-    # print(Game._get_valid_cells(game.get_percepts()["gameboard"]))
+    # print(Game.get_valid_cells(game.get_percepts()["gameboard"]))
     #print(crrd.name, crrd.type, crrd.directions)
     # print(Game._valid_tunnel(game.get_percepts()["gameboard"], (6,11)))
     # print(Game.is_valid_play(game.get_percepts()["gameboard"], crrd, (6,12)))
