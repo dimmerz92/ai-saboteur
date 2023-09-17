@@ -7,7 +7,13 @@ class Deck:
         self.deck = self._init_deck()
         self.goal_cards = Deck._get_special_cards()
 
-    def _init_deck(self):
+    def _init_deck(self) -> list:
+        """
+        Initialises a deck of agent playable cards
+
+            Returns:
+                deck (list): a list of Card instances
+        """
         deck = []
         for key, value in C.ACTION_CARDS.items():
             for _ in range(value):
@@ -20,33 +26,53 @@ class Deck:
         random.shuffle(deck)
         return deck
     
-    def _get_special_cards():
+    def _get_special_cards() -> dict:
+        """
+        Initialises the special cards (Start, gold, and goals)
+
+            Returns:
+                cards (dict): a dictionary
+        """
         cards = {
             "start": Card(
                 "CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
-            "goal": [],
-            "hidden": []
+            "goal": []
         }
 
         gold = random.randint(0, len(C.GOAL_COORDS))
 
         for i in range(C.SPECIAL_CARDS["GOAL"]["QTY"]):
             cards["goal"].append(Card(
-                "CROSS_ROAD","PATH",C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i
-                ))
-            cards["hidden"].append(Card(
-                "GOAL", "PATH", C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i
+                "GOAL","PATH",C.SPECIAL_CARDS["GOAL"]["PATH"], gold == i
                 ))
             
         return cards
     
-    def deal_hand(self, quantity):
-        return [self._deck.pop() for _ in range(quantity)]
+    def deal_hand(self, quantity: int) -> list:
+        """
+        Deals a starting hand
+
+            Parameters:
+                quantity (int): a positive nonzero integer
+            
+            Returns:
+                cards (list): a list of Card instances
+        """
+        assert quantity > 0, \
+            "Initial hand must be greater than zero"
+        
+        return [self.deck.pop() for _ in range(quantity)]
     
-    def draw_card(self):
-        return self._deck.pop() if len(self._deck) > 0 else None
+    def draw_card(self) -> Card:
+        """
+        Draws an agent playable card from the deck
+
+        Returns:
+            card (Card): an instance of Card
+        """
+        return self.deck.pop() if len(self.deck) > 0 else None
     
 if __name__ == "__main__":
     deck = Deck()
-    print(deck.get_special_cards())
+    print(Deck._get_special_cards())
     print(deck.deal_hand(4))
