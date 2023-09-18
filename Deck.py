@@ -16,7 +16,7 @@ class Deck:
         """
         deck = []
         for key, value in C.ACTION_CARDS.items():
-            for _ in range(value):
+            for _ in range(value["QTY"]):
                 deck.append(Card(key, "ACTION", None))
 
         for key, value in {**C.PATH_CARDS, **C.DEAD_END_CARDS}.items():

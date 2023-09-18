@@ -31,17 +31,18 @@ TRANSPOSE = {
 }
 
 ACTION_CARDS = {
-    "MAP": 6,
-    "DYNAMITE": 3,
-    "SABOTAGE": 9,
-    "MEND": 9
+    "MAP": {"QTY": 6, "SCORE": 4},
+    "DYNAMITE": {"QTY": 3, "SCORE": 2},
+    "SABOTAGE": {"QTY": 9, "SCORE": -4},
+    "MEND": {"QTY": 9, "SCORE": 4}
 }
 
 PATH_CARDS = {
-    "CORNER": {"PATH": ["SOUTH", "EAST"], "QTY": 9},
-    "CROSS_ROAD": {"PATH": ["NORTH", "SOUTH", "EAST", "WEST"], "QTY": 1},
-    "JUNCTION": {"PATH": ["WEST", "SOUTH", "EAST"], "QTY": 10},
-    "LINEAR": {"PATH": ["NORTH", "SOUTH"], "QTY": 7}
+    "CORNER": {"PATH": ["SOUTH", "EAST"], "QTY": 9, "SCORE": 2},
+    "CROSS_ROAD": {"PATH": ["NORTH", "SOUTH", "EAST", "WEST"], "QTY": 1,
+                   "SCORE": 4},
+    "JUNCTION": {"PATH": ["WEST", "SOUTH", "EAST"], "QTY": 10, "SCORE": 3},
+    "LINEAR": {"PATH": ["NORTH", "SOUTH"], "QTY": 7, "SCORE": 2}
 }
 
 SPECIAL_CARDS = {
@@ -50,12 +51,21 @@ SPECIAL_CARDS = {
 }
 
 DEAD_END_CARDS = {
-    "CORNER_DE": {"PATH": ["SOUTH", "EAST"], "QTY": 1},
-    "CROSS_ROAD_DE": {"PATH": ["NORTH", "SOUTH", "EAST", "WEST"], "QTY": 1},
-    "SINGLE_DE": {"PATH": ["SOUTH"], "QTY": 1},
-    "JUNCTION_DE": {"PATH": ["WEST", "SOUTH", "EAST"], "QTY": 1},
-    "LINEAR_DE": {"PATH": ["NORTH", "SOUTH"], "QTY": 1}
+    "CORNER_DE": {"PATH": ["SOUTH", "EAST"], "QTY": 1, "SCORE": -10},
+    "CROSS_ROAD_DE": {"PATH": ["NORTH", "SOUTH", "EAST", "WEST"], "QTY": 1,
+                      "SCORE": -10},
+    "SINGLE_DE": {"PATH": ["SOUTH"], "QTY": 1, "SCORE": -10},
+    "JUNCTION_DE": {"PATH": ["WEST", "SOUTH", "EAST"], "QTY": 1, "SCORE": -10},
+    "LINEAR_DE": {"PATH": ["NORTH", "SOUTH"], "QTY": 1, "SCORE": -10}
 }
+
+ALL_PLAYABLE_CARDS = {**ACTION_CARDS, **PATH_CARDS, **DEAD_END_CARDS}
+ACTION_MIN = min([v["SCORE"] for v in ACTION_CARDS.values()])
+ACTION_MAX = max([v["SCORE"] for v in ACTION_CARDS.values()])
+PATH_MIN = min([v["SCORE"] for v in {**PATH_CARDS, **DEAD_END_CARDS}.values()])
+PATH_MAX = max([v["SCORE"] for v in {**PATH_CARDS, **DEAD_END_CARDS}.values()])
+DIST_MAX = ROWS + COLS
+DIST_MIN = 1
 
 CELL_SIZE = 50
 INFO_SIZE = 35

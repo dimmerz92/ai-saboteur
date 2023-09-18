@@ -1,7 +1,6 @@
 from Agent import Agent
 from Card import Card
 from Deck import Deck
-from agent_logic import random_behaviour
 
 from typing import Callable
 from copy import deepcopy
@@ -12,10 +11,10 @@ import random
 ROLES = random.sample(C.ROLES, C.PLAYERS)
 
 class Game:
-    def __init__(self):
+    def __init__(self, agent_logic):
         self.deck = Deck()
         self.gameboard = self._init_gameboard(C.ROWS, C.COLS)
-        self.agents = self._init_agents()
+        self.agents = self._init_agents(agent_logic)
         self.turn = random.choice(list(self.agents.keys()))
         self.winner = None
         self.skipped = 0
@@ -39,7 +38,7 @@ class Game:
 
         return gameboard
     
-    def _init_agents(self) -> dict:
+    def _init_agents(self, agent_logic) -> dict:
         """
         Initialises dictionary of Agent objects based on length of ROLES
 
@@ -49,14 +48,14 @@ class Game:
         agents = {}
         for i, role in enumerate(ROLES):
             agents[f"agent-{i}"] = {
-                "agent": Agent(role, self.deck.deal_hand(C.DEAL), random_behaviour),
+                "agent": Agent(role, self.deck.deal_hand(C.DEAL), agent_logic),
                 "history": []
             }
         
         return agents
     
-    def whos_turn(self) -> Agent:
-        return self.agents[self.turn]["agent"]
+    def whos_turn(self, text=False) -> Agent:
+        return self.turn if text else self.agents[self.turn]["agent"]
     
     @staticmethod
     def _valid_tunnel(game_state: np.ndarray, start_coords: tuple) -> bool:
@@ -323,6 +322,8 @@ class Game:
             else:
                 new_game_state["agents"][target]["agent"].broken_tools = False
             
+            new_game_state["agents"][new_game_state["turn"]]["history"].append(
+                card.name)
             new_game_state["turn"] = Game._next_turn(new_game_state)
 
             return new_game_state
@@ -347,7 +348,7 @@ class Game:
                 new_game_state["gameboard"][target] = card
         
         if Game._is_terminal(new_game_state, target):
-            new_game_state["winner"] = agent["agent"].role
+            new_game_state["winner"] = agent["agent"]._role
         else:
             new_game_state["agents"][new_game_state["turn"]]["history"].append(
                 card.name)
@@ -380,6 +381,7 @@ class Game:
 
         new_game_state = Game.transition_result(game_state, action)
         self.gameboard = new_game_state["gameboard"]
+        self.agents[self.turn]["history"] = new_game_state["agents"][self.turn]["history"]
         self.turn = new_game_state["turn"]
         self.winner = new_game_state["winner"]
         
