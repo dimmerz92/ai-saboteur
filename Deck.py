@@ -35,7 +35,7 @@ class Deck:
         """
         cards = {
             "start": Card(
-                "CROSS_ROAD", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
+                "START", "PATH", C.SPECIAL_CARDS["START"]["PATH"]),
             "goal": []
         }
 

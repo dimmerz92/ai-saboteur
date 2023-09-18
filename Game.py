@@ -82,19 +82,34 @@ class Game:
             for offset in C.DIRECTIONS.values():
                 next_node = tuple(map(sum, zip(offset, node)))
 
+                if next_node == C.START:
+                    return True
+
                 if (next_node < (0, 0) or next_node[0] > C.ROWS - 1 or
                     next_node[1] > C.COLS - 1):
                     continue
 
                 next_cell = gameboard[next_node]
-                if (next_cell and "DE" not in next_cell.name and
-                    not node == start_coords):
-                    if not Game.is_valid_play(game_state, next_cell, next_node):
-                        continue
-                
-                if (next_cell and "DE" not in next_cell.name and
-                    next_node not in visited):
+                if not next_cell:
+                    continue
+                elif "DE" in next_cell.name:
+                    continue
+                elif next_node not in visited:
                     nodes.append(next_node)
+
+
+
+
+                # if ((next_cell and "DE" in next_cell.name) or
+                #     not node == start_coords):
+                #     continue
+                
+                # if next_cell and not Game.is_valid_play(game_state, next_cell, next_node):
+                #         continue
+                
+                # if (next_cell and "DE" not in next_cell.name and
+                #     next_node not in visited):
+                #     nodes.append(next_node)
 
             if C.START in nodes:
                 return True
@@ -134,6 +149,7 @@ class Game:
                     if ((next_cell and "DE" in next_cell.name) or
                         not Game._valid_tunnel(game_state, next_coord)):
                         continue
+
                     neighbours.append(next_coord)
 
         return neighbours
@@ -174,19 +190,10 @@ class Game:
                 return cell.name not in C.SPECIAL_CARDS.keys()
             else:
                 return False
-            
-        if "DE" in card.name:
-            for dir, offset in C.DIRECTIONS.items():
-                next_coord = tuple(map(sum, zip(offset, target)))
-
-                if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
-                    next_coord[1] > C.COLS - 1):
-                    continue
-
-                next_cell = gameboard[next_coord]
-                if next_cell and next_cell.name in ["START", "GOAL"]:
-                    return False
         
+        if gameboard[target]:
+            return False
+            
         checks = []
         for dir, offset in C.DIRECTIONS.items():
             next_coord = tuple(map(sum, zip(target, offset)))
@@ -198,15 +205,50 @@ class Game:
             next_cell = gameboard[next_coord]
             if not next_cell:
                 checks.append(None)
-            elif ((dir in card.directions and C.COMPLEMENT[dir] not
-                   in next_cell.directions) or
-                   (C.COMPLEMENT[dir] in next_cell.directions and dir not
-                    in card.directions)):
+            elif next_cell.name in ["START", "GOAL"] and "DE" in card.name:
+                return False
+            elif ((dir in card.directions and
+                   C.COMPLEMENT[dir] not in next_cell.directions) or
+                  (dir not in card.directions and 
+                   C.COMPLEMENT[dir] in next_cell.directions)):
                 return False
             else:
                 checks.append(True)
             
         return True in checks
+            
+        # if "DE" in card.name:
+        #     for dir, offset in C.DIRECTIONS.items():
+        #         next_coord = tuple(map(sum, zip(offset, target)))
+
+        #         if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+        #             next_coord[1] > C.COLS - 1):
+        #             continue
+
+        #         next_cell = gameboard[next_coord]
+        #         if next_cell and next_cell.name in ["START", "GOAL"]:
+        #             return False
+        
+        # checks = []
+        # for dir, offset in C.DIRECTIONS.items():
+        #     next_coord = tuple(map(sum, zip(target, offset)))
+
+        #     if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
+        #         next_coord[1] > C.COLS - 1):
+        #         continue
+
+        #     next_cell = gameboard[next_coord]
+        #     if not next_cell:
+        #         checks.append(None)
+        #     elif ((dir in card.directions and C.COMPLEMENT[dir] not
+        #            in next_cell.directions) or
+        #            (C.COMPLEMENT[dir] in next_cell.directions and dir not
+        #             in card.directions)):
+        #         return False
+        #     else:
+        #         checks.append(True)
+            
+        # return True in checks
     
     @staticmethod
     def _next_turn(game_state: dict) -> str:
