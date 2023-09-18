@@ -3,6 +3,7 @@ from Card import Card
 from Deck import Deck
 from agent_logic import random_behaviour
 
+from typing import Callable
 from copy import deepcopy
 import constants as C
 import numpy as np
@@ -96,20 +97,6 @@ class Game:
                     continue
                 elif next_node not in visited:
                     nodes.append(next_node)
-
-
-
-
-                # if ((next_cell and "DE" in next_cell.name) or
-                #     not node == start_coords):
-                #     continue
-                
-                # if next_cell and not Game.is_valid_play(game_state, next_cell, next_node):
-                #         continue
-                
-                # if (next_cell and "DE" not in next_cell.name and
-                #     next_node not in visited):
-                #     nodes.append(next_node)
 
             if C.START in nodes:
                 return True
@@ -216,39 +203,6 @@ class Game:
                 checks.append(True)
             
         return True in checks
-            
-        # if "DE" in card.name:
-        #     for dir, offset in C.DIRECTIONS.items():
-        #         next_coord = tuple(map(sum, zip(offset, target)))
-
-        #         if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
-        #             next_coord[1] > C.COLS - 1):
-        #             continue
-
-        #         next_cell = gameboard[next_coord]
-        #         if next_cell and next_cell.name in ["START", "GOAL"]:
-        #             return False
-        
-        # checks = []
-        # for dir, offset in C.DIRECTIONS.items():
-        #     next_coord = tuple(map(sum, zip(target, offset)))
-
-        #     if (next_coord < (0, 0) or next_coord[0] > C.ROWS - 1 or
-        #         next_coord[1] > C.COLS - 1):
-        #         continue
-
-        #     next_cell = gameboard[next_coord]
-        #     if not next_cell:
-        #         checks.append(None)
-        #     elif ((dir in card.directions and C.COMPLEMENT[dir] not
-        #            in next_cell.directions) or
-        #            (C.COMPLEMENT[dir] in next_cell.directions and dir not
-        #             in card.directions)):
-        #         return False
-        #     else:
-        #         checks.append(True)
-            
-        # return True in checks
     
     @staticmethod
     def _next_turn(game_state: dict) -> str:
@@ -322,6 +276,21 @@ class Game:
             "skipped": self.skipped
         }
     
+    def draw(self) -> Card:
+        """
+        Draws a card from the deck and checks if the deck is empty
+
+            Returns:
+                card (Card): an instance of Card class
+        """
+        card = self.deck.draw_card()
+        if not card:
+            self.winner = "SABOTAGE"
+
+        return card
+
+    
+    @staticmethod
     def transition_result(game_state: dict, action: dict) -> dict:
         """
         Returns a new game state after an agent move
@@ -386,7 +355,8 @@ class Game:
 
         return new_game_state
     
-    def state_transition(self, action: dict) -> None:
+    def state_transition(self, action: dict,
+                         _callback: Callable[[tuple],None]) -> None:
         """
         Transitions the state of the Game object
 
@@ -402,10 +372,10 @@ class Game:
         game_state = self.get_percepts()
       
         if card.name in ["SABOTAGE", "MEND"]:
-            # function to briefly display card in middle of screen
+            _callback((target, card))
             pass
         elif card.name in ["MAP", "DYNAMITE"]:
-            # function to briefly display card at target coordinate
+            _callback((target, card))
             pass
 
         new_game_state = Game.transition_result(game_state, action)
